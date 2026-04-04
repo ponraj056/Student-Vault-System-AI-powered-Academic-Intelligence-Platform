@@ -1,8 +1,7 @@
 # 🚀 StudentVault System
 
 **StudentVault** is an AI-powered academic intelligence platform that enables instant access, analysis, and management of student data using natural language queries.
-
-> ❝ No dashboards. Just insights. ❞
+"Just Insights"
 
 ---
 
