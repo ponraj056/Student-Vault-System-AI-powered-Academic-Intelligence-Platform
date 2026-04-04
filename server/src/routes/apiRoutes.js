@@ -104,6 +104,16 @@ router.get('/departments', (req, res) => {
   res.json({ data: DEPARTMENTS.map(d => d.toUpperCase()) });
 });
 
+// GET /api/dashboard/all-students
+router.get('/dashboard/all-students', async (req, res) => {
+  try {
+    const data = await studentService.getDashboardStudents();
+    res.json({ count: data.length, data });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // POST /api/ai/query
 router.post('/ai/query', handleAiQuery);
 

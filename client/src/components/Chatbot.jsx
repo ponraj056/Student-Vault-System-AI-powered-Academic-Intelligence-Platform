@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { getAIResponse, SUGGESTIONS, STUDENTS } from '../data';
+import { SUGGESTIONS } from '../data';
 import StudentCard from './StudentCard';
 
 /* ---- Sub-components ---- */
@@ -130,28 +130,7 @@ const INITIAL_MESSAGES = [
   },
 ];
 
-/* Filter students based on query */
-function getMatchedStudents(query) {
-  const lower = query.toLowerCase();
 
-  const specificMatches = STUDENTS.filter(s => lower.includes(s.name.toLowerCase().split(' ')[0]) || lower.includes(s.id.toLowerCase()));
-  if (specificMatches.length > 0) return specificMatches;
-
-  if (lower.includes('low attendance') || lower.includes('below 75') || lower.includes('attendance below')) {
-    return STUDENTS.filter(s => s.attendance < 75);
-  }
-  if (lower.includes('arrear')) {
-    return STUDENTS.filter(s => s.status === 'arrear');
-  }
-  if (lower.includes('top') || lower.includes('performer') || lower.includes('best') || lower.includes('highest')) {
-    return [...STUDENTS].sort((a, b) => b.cgpa - a.cgpa).slice(0, 3);
-  }
-  if (lower.includes('cse')) return STUDENTS.filter(s => s.dept === 'CSE');
-  if (lower.includes('ece')) return STUDENTS.filter(s => s.dept === 'ECE');
-  if (lower.includes('it department') || lower.includes('it students')) return STUDENTS.filter(s => s.dept === 'IT');
-  if (lower.includes('3rd year')) return STUDENTS.filter(s => s.year === 3);
-  return [];
-}
 
 /* ---- Main Chatbot component ---- */
 export default function Chatbot({ standalone = false }) {
@@ -168,23 +147,53 @@ export default function Chatbot({ standalone = false }) {
 
   const now = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  const sendMessage = (text) => {
+  const sendMessage = async (text) => {
     const msg = text || input.trim();
     if (!msg) return;
     setInput('');
     setMessages(prev => [...prev, { id: Date.now(), role: 'user', text: msg, time: now() }]);
     setTyping(true);
-    setTimeout(() => {
+    
+    try {
+      const response = await fetch('/api/ai/query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: msg })
+      });
+      const data = await response.json();
+      
+      let matchedData = [];
+      if (data.data && Array.isArray(data.data)) {
+        // Map backend formatting to expected frontend bot format
+        matchedData = data.data.map((item, idx) => ({
+          id: item.rollNo || item._id || String(idx),
+          name: item.name,
+          dept: item._dept || item.dept || 'Unknown',
+          year: item.year || item.semester || 3,
+          cgpa: item.cgpa || 0,
+          attendance: item.attendance || 90,
+          status: item.arrears > 0 ? 'arrear' : 'clear',
+          avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(item.name?.substring(0,2) || 'XX')}&backgroundColor=4ff07f&textColor=003915`
+        }));
+      }
+
       setTyping(false);
-      const matched = getMatchedStudents(msg);
       setMessages(prev => [...prev, {
         id: Date.now() + 1,
         role: 'ai',
-        text: getAIResponse(msg),
+        text: data.message || "I couldn't process that properly.",
         time: now(),
-        students: matched,
+        students: matchedData,
       }]);
-    }, 900 + Math.random() * 600);
+    } catch (e) {
+      setTyping(false);
+      setMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        role: 'ai',
+        text: "Error connecting to AI service.",
+        time: now(),
+      }]);
+    }
   };
 
   const clearChat = () => setMessages([{ id: Date.now(), role: 'ai', time: now(), text: '🗑️ Chat cleared. How can I help you? 👋' }]);

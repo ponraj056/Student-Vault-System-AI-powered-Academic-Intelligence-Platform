@@ -1,30 +1,29 @@
 import { useState, useEffect } from 'react';
-import { STUDENTS } from '../data';
 import StudentCard from './StudentCard';
 import Analytics from './Analytics';
 import Chatbot from './Chatbot';
 
-const STATS = [
+const getStatsConfig = (data) => [
   {
-    label: 'Total Students', value: '4,892', badge: '+12.4%', badgeClass: 'badge-success',
+    label: 'Total Students', value: data.totalStudents || '0', badge: '+12.4%', badgeClass: 'badge-success',
     icon: 'group', accent: '#4ff07f',
     bg: 'bg-[#4ff07f]/10 dark:bg-[#4ff07f]/10', iconColor: 'text-[#4ff07f] dark:text-[#4ff07f]',
     lightBg: '#f0fdf4', lightText: '#16a34a',
   },
   {
-    label: 'Present Today', value: '4,608', badge: '94.2%', badgeClass: 'badge-info',
+    label: 'Pass Rate', value: `${data.passRate || '0.00'}%`, badge: 'Recent', badgeClass: 'badge-info',
     icon: 'how_to_reg', accent: '#adc6ff',
     bg: 'bg-blue-100/80 dark:bg-[#adc6ff]/10', iconColor: 'text-blue-500 dark:text-[#adc6ff]',
     lightBg: '#eff6ff', lightText: '#2563eb',
   },
   {
-    label: 'Arrear Count', value: '214', badge: '-2.1%', badgeClass: 'badge-danger',
+    label: 'Arrear Count', value: data.totalArrears || '0', badge: `${data.failRate || '0.00'}% Fail`, badgeClass: 'badge-danger',
     icon: 'warning', accent: '#ffb4ab',
     bg: 'bg-red-100/80 dark:bg-[#ffb4ab]/10', iconColor: 'text-red-400 dark:text-[#ffb4ab]',
     lightBg: '#fff1f2', lightText: '#dc2626',
   },
   {
-    label: 'Active Reports', value: '18', badge: 'Live', badgeClass: 'badge-success',
+    label: 'Active Departments', value: data.departments || '16', badge: 'Live', badgeClass: 'badge-success',
     icon: 'analytics', accent: '#f9d03f',
     bg: 'bg-yellow-100/80 dark:bg-[#f9d03f]/10', iconColor: 'text-yellow-500 dark:text-[#f9d03f]',
     lightBg: '#fefce8', lightText: '#ca8a04', live: true,
@@ -53,16 +52,38 @@ function SkeletonCard() {
 export default function Dashboard({ activeNav, onToast, onOpenModal }) {
   const [filters, setFilters] = useState({ dept: '', year: '', cgpa: '', status: '' });
   const [loading, setLoading] = useState(true);
+  const [studentsList, setStudentsList] = useState([]);
+  const [statsData, setStatsData] = useState({});
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      setLoading(false);
-      onToast('Data fetched successfully ✓', 'success');
-    }, 1000);
-    return () => clearTimeout(t);
+    let active = true;
+    const loadData = async () => {
+      try {
+        const [statsRes, studentsRes] = await Promise.all([
+          fetch('/api/stats'),
+          fetch('/api/dashboard/all-students')
+        ]);
+        const stats = await statsRes.json();
+        const students = await studentsRes.json();
+        
+        if (active) {
+          setStatsData(stats || {});
+          setStudentsList(students?.data || []);
+          setLoading(false);
+          onToast('Backend data synced successfully ✓', 'success');
+        }
+      } catch (err) {
+        if (active) {
+          setLoading(false);
+          onToast('Failed to connect to backend.', 'error');
+        }
+      }
+    };
+    loadData();
+    return () => { active = false; };
   }, []);
 
-  const filtered = STUDENTS.filter(s => {
+  const filtered = studentsList.filter(s => {
     if (filters.dept && s.dept !== filters.dept) return false;
     if (filters.year && s.year !== parseInt(filters.year)) return false;
     if (filters.status === 'clear' && s.status !== 'clear') return false;
@@ -79,7 +100,7 @@ export default function Dashboard({ activeNav, onToast, onOpenModal }) {
   const handleFilterChange = (key, value) => {
     const next = { ...filters, [key]: value };
     setFilters(next);
-    const count = STUDENTS.filter(s => {
+    const count = studentsList.filter(s => {
       if (next.dept && s.dept !== next.dept) return false;
       if (next.year && s.year !== parseInt(next.year)) return false;
       if (next.status === 'clear' && s.status !== 'clear') return false;
@@ -91,7 +112,7 @@ export default function Dashboard({ activeNav, onToast, onOpenModal }) {
       return true;
     }).length;
     if (count === 0) onToast('No students match these filters', 'error');
-    else if (count < STUDENTS.length) onToast(`Found ${count} student${count > 1 ? 's' : ''}`, 'info');
+    else if (count < studentsList.length) onToast(`Found ${count} student${count > 1 ? 's' : ''}`, 'info');
   };
 
   const handleExport = (type) => {
@@ -129,8 +150,9 @@ export default function Dashboard({ activeNav, onToast, onOpenModal }) {
       </nav>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {STATS.map(s => (
+      {!loading && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {getStatsConfig(statsData).map(s => (
           <div
             key={s.label}
             className="relative rounded-2xl p-5 overflow-hidden transition-all duration-200 hover:-translate-y-1
@@ -170,7 +192,8 @@ export default function Dashboard({ activeNav, onToast, onOpenModal }) {
             <h3 className="text-2xl font-black text-gray-900 dark:text-white">{s.value}</h3>
           </div>
         ))}
-      </div>
+        </div>
+      )}
 
       {/* AI Chatbot widget */}
       <Chatbot />
@@ -232,9 +255,9 @@ export default function Dashboard({ activeNav, onToast, onOpenModal }) {
               Reset
             </button>
             <span className="text-xs font-mono text-gray-400 dark:text-[#8890b5]">
-              {filtered.length === STUDENTS.length
-                ? `All ${STUDENTS.length} students`
-                : `${filtered.length} / ${STUDENTS.length}`}
+              {filtered.length === studentsList.length
+                ? `All ${studentsList.length} students`
+                : `${filtered.length} / ${studentsList.length}`}
             </span>
           </div>
         </div>
