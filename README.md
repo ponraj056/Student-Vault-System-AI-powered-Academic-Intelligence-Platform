@@ -64,3 +64,21 @@ User Input → Query Processing → Backend API → Database → AI Logic → Re
 ---
 
 ## 📁 Project Structure
+
+src/
+├── components/
+│   ├── Sidebar.jsx        ← Left navigation
+│   ├── Topbar.jsx         ← Top navbar
+│   ├── Dashboard.jsx      ← Main page (stats + records)
+│   ├── Chatbot.jsx        ← AI chat interface
+│   ├── Analytics.jsx      ← Charts (Bar + Doughnut)
+│   ├── StudentCard.jsx    ← Individual student card
+│   ├── StudentModal.jsx   ← Student detail popup
+│   └── ToastContainer.jsx ← Notification toasts
+├── data/
+│   └── index.js           ← Student data + AI responses
+├── hooks/
+│   └── useToast.js        ← Toast state hook
+├── App.jsx                ← Root component
+├── main.jsx               ← Entry point
+└── index.css              ← Global styles
