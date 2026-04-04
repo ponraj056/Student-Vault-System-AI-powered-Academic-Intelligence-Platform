@@ -10,10 +10,10 @@ import { ATTENDANCE_CHART_DATA, CGPA_CHART_DATA } from '../data';
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend);
 
 const TOOLTIP_STYLE = {
-  backgroundColor: '#1e1e32',
-  titleColor: '#e2e0fc',
-  bodyColor: '#bbcbb9',
-  borderColor: 'rgba(60,74,61,0.4)',
+  backgroundColor: '#121212',
+  titleColor: '#f3f4f6',
+  bodyColor: '#9ca3af',
+  borderColor: 'rgba(255,255,255,0.1)',
   borderWidth: 1,
   padding: 10,
   cornerRadius: 10,
@@ -50,12 +50,12 @@ export default function Analytics() {
       y: {
         min: 60,
         max: 100,
-        ticks: { callback: v => v + '%', font: { size: 11 }, color: '#8890b5' },
-        grid: { color: 'rgba(60,74,61,0.15)' },
+        ticks: { callback: v => v + '%', font: { size: 11 }, color: '#9ca3af' },
+        grid: { color: 'rgba(255,255,255,0.05)' },
         border: { display: false },
       },
       x: {
-        ticks: { font: { size: 12, weight: '700' }, color: '#bbcbb9' },
+        ticks: { font: { size: 12, weight: '700' }, color: '#f3f4f6' },
         grid: { display: false },
         border: { display: false },
       },
@@ -67,7 +67,7 @@ export default function Analytics() {
     datasets: [{
       data: CGPA_CHART_DATA.data,
       backgroundColor: CGPA_CHART_DATA.colors,
-      borderColor: '#1e1e32',
+      borderColor: '#121212',
       borderWidth: 3,
       hoverOffset: 10,
     }],
@@ -84,7 +84,7 @@ export default function Analytics() {
           padding: 16,
           usePointStyle: true,
           pointStyleWidth: 8,
-          color: '#bbcbb9',
+          color: '#9ca3af',
         },
       },
       tooltip: {
@@ -159,10 +159,10 @@ export default function Analytics() {
                 style={{ background: CGPA_CHART_DATA.colors[i] }}
               />
               <div className="min-w-0">
-                <p className="text-xs font-bold text-gray-700 dark:text-[#e2e0fc] truncate">
+                <p className="text-xs font-bold text-gray-700 dark:text-[#f3f4f6] truncate">
                   {CGPA_CHART_DATA.data[i]} students
                 </p>
-                <p className="text-[10px] text-gray-400 dark:text-[#8890b5] truncate">{label.split(' ')[0]}</p>
+                <p className="text-[10px] text-gray-400 dark:text-[#9ca3af] truncate">{label.split(' ')[0]}</p>
               </div>
             </div>
           ))}

@@ -96,6 +96,7 @@ async function getDashboardStudents() {
           cgpa: cgpa,
           attendance: attPercent,
           status: status,
+          internshipDetails: s.internshipDetails || '',
           avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(s.name.substring(0,2))}&backgroundColor=4ff07f&textColor=003915`
         });
       }

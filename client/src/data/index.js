@@ -60,9 +60,10 @@ export function getCgpaBadgeStyle(cgpa) {
 
 export const NAV_ITEMS = [
   { key: 'students',   label: 'Students',   icon: 'group' },
-  { key: 'chatbot',    label: 'AI Chatbot', icon: 'smart_toy' },
+  { key: 'chatbot',    label: 'AI Assistant', icon: 'smart_toy' },
   { key: 'attendance', label: 'Attendance', icon: 'calendar_today' },
   { key: 'results',    label: 'Results',    icon: 'grade' },
+  { key: 'internship', label: 'Internship', icon: 'workspace_premium' },
   { key: 'reports',    label: 'Reports',    icon: 'description' },
   { key: 'upload',     label: 'Upload',     icon: 'cloud_upload' },
 ];

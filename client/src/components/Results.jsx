@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 
-export default function Results({ onToast }) {
-  const [dept, setDept] = useState('CSE');
-  const [activeTab, setActiveTab] = useState('ranking');
+export default function Results({ onToast, user }) {
+  const [dept, setDept] = useState(user.role === 'student' ? user.department?.toUpperCase() || 'CSE' : 'CSE');
+  const [activeTab, setActiveTab] = useState(user.role === 'student' ? 'personal' : 'ranking');
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
 
@@ -15,12 +15,18 @@ export default function Results({ onToast }) {
           ? `/api/results/ranking?dept=${dept}`
           : activeTab === 'arrears'
           ? `/api/results/arrears?dept=${dept}`
+          : activeTab === 'personal'
+          ? `/api/results/ranking?dept=${dept}` // Reuse ranking for personal search or add specific route
           : `/api/results/topper?dept=${dept}&semester=5`;
           
         const res = await fetch(url);
         const json = await res.json();
         if (active) {
-          setData(json.data || []);
+          let list = json.data || [];
+          if (user.role === 'student' && user.studentId) {
+            list = list.filter(r => r.rollNo === user.studentId);
+          }
+          setData(list);
           setLoading(false);
         }
       } catch (e) {
@@ -32,46 +38,52 @@ export default function Results({ onToast }) {
     };
     fetchResults();
     return () => { active = false; };
-  }, [dept, activeTab, onToast]);
+  }, [dept, activeTab, onToast, user]);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Examination Results</h2>
+          <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">
+            {user.role === 'student' ? 'My Academic Results' : 'Examination Results'}
+          </h2>
           <p className="text-sm mt-0.5 text-gray-500 dark:text-[#8890b5]">
-            Grade & performance records
+            {user.role === 'student' ? 'Your personal grade & performance records' : 'Grade & performance records'}
           </p>
         </div>
         <div className="flex gap-3">
-          <div className="flex bg-white dark:bg-[#1e1e32] rounded-lg p-1 border border-gray-200 dark:border-white/5">
-            {[
-              { id: 'ranking', label: 'Ranking' },
-              { id: 'toppers', label: 'Toppers' },
-              { id: 'arrears', label: 'Arrears' }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-1.5 text-sm font-bold rounded-md transition-colors ${
-                  activeTab === tab.id 
-                    ? 'bg-[#4ff07f]/10 text-[#4ff07f]' 
-                    : 'text-gray-500 hover:text-gray-700 dark:text-[#8890b5] dark:hover:text-white'
-                }`}
+          {user.role !== 'student' && (
+            <>
+              <div className="flex bg-white dark:bg-[#1e1e32] rounded-lg p-1 border border-gray-200 dark:border-white/5">
+                {[
+                  { id: 'ranking', label: 'Ranking' },
+                  { id: 'toppers', label: 'Toppers' },
+                  { id: 'arrears', label: 'Arrears' }
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`px-4 py-1.5 text-sm font-bold rounded-md transition-colors ${
+                      activeTab === tab.id 
+                        ? 'bg-[#4ff07f]/10 text-[#4ff07f]' 
+                        : 'text-gray-500 hover:text-gray-700 dark:text-[#8890b5] dark:hover:text-white'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+              <select 
+                className="filter-select"
+                value={dept}
+                onChange={(e) => setDept(e.target.value)}
               >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-          <select 
-            className="filter-select"
-            value={dept}
-            onChange={(e) => setDept(e.target.value)}
-          >
-            {['CSE', 'ECE', 'IT', 'MECH', 'CIVIL'].map(d => (
-              <option key={d} value={d}>{d}</option>
-            ))}
-          </select>
+                {['CSE', 'ECE', 'IT', 'MECH', 'CIVIL'].map(d => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
+            </>
+          )}
         </div>
       </div>
 
@@ -82,14 +94,14 @@ export default function Results({ onToast }) {
           </div>
         ) : data.length === 0 ? (
           <div className="p-12 text-center text-gray-500 dark:text-[#8890b5]">
-            No result records found for {dept} ({activeTab}).
+            {user.role === 'student' ? 'No result records found for you.' : `No result records found for ${dept} (${activeTab}).`}
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-100 dark:border-white/5">
-                  {activeTab === 'ranking' && <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-[#8890b5] uppercase tracking-wider">Rank</th>}
+                  {(activeTab === 'ranking' || user.role === 'student') && <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-[#8890b5] uppercase tracking-wider">Rank</th>}
                   <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-[#8890b5] uppercase tracking-wider">Student Name</th>
                   <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-[#8890b5] uppercase tracking-wider">Roll No</th>
                   <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-[#8890b5] uppercase tracking-wider">Semester</th>
@@ -100,7 +112,7 @@ export default function Results({ onToast }) {
               <tbody>
                 {data.map((record, i) => (
                   <tr key={i} className="border-b border-gray-50 dark:border-white/5 hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
-                    {activeTab === 'ranking' && (
+                    {(activeTab === 'ranking' || user.role === 'student') && (
                       <td className="px-6 py-4 text-sm font-bold text-[#f9d03f]">
                         #{record.rank || i + 1}
                       </td>

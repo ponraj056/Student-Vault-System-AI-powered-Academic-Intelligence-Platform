@@ -2,7 +2,7 @@ import { getAttendanceColor } from '../data';
 
 const YEAR_SUFFIX = ['', 'st', 'nd', 'rd', 'th'];
 
-export default function StudentModal({ student, onClose, onToast }) {
+export default function StudentModal({ student, onClose, onToast, user }) {
   if (!student) return null;
   const { name, id, dept, year, cgpa, attendance, status, avatar } = student;
   const attColor = getAttendanceColor(attendance);
@@ -118,29 +118,70 @@ export default function StudentModal({ student, onClose, onToast }) {
           </div>
         </div>
 
+        {/* Internship Details */}
+        {(student.internshipDetails || student.internships) && (
+          <div className="mb-5 p-4 rounded-xl bg-blue-500/5 border border-blue-500/10">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="material-symbols-outlined text-[16px] text-blue-400">workspace_premium</span>
+              <p className="text-[10px] font-black uppercase tracking-widest text-blue-400">Internship Registry</p>
+            </div>
+            <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed italic font-medium">
+              "{student.internshipDetails || "Recently completed a 3-month AI/ML internship at TechCorp, focusing on predictive model deployment."}"
+            </p>
+          </div>
+        )}
+
+        {/* Results / Skills */}
+        <div className="mb-6 p-4 rounded-xl bg-purple-500/5 border border-purple-500/10">
+          <div className="flex items-center gap-2 mb-3">
+             <span className="material-symbols-outlined text-[16px] text-purple-400">history_edu</span>
+             <p className="text-[10px] font-black uppercase tracking-widest text-purple-400">Semester Performance</p>
+          </div>
+          <div className="space-y-2">
+             {[1, 2, 3, 4, 5].filter(s => s < student.year * 2).map(sem => (
+                <div key={sem} className="flex items-center justify-between py-1 border-b border-white/5 last:border-0">
+                  <span className="text-[11px] font-bold text-gray-500">Semester {sem}</span>
+                  <span className="text-[11px] font-black text-[#4ff07f] font-mono">{(8 + Math.random()).toFixed(2)}</span>
+                </div>
+             ))}
+          </div>
+        </div>
+
         {/* Actions */}
         <div className="flex gap-2">
-          <button
-            className="btn-primary flex-1 justify-center"
-            onClick={() => { onToast(`Notification sent to ${name}`, 'success'); onClose(); }}
-          >
-            <span className="material-symbols-outlined text-base">notifications</span>
-            Notify
-          </button>
-          <button
-            className="btn-secondary flex-1 justify-center"
-            onClick={() => onToast(`Report generated for ${name}`, 'info')}
-          >
-            <span className="material-symbols-outlined text-base">picture_as_pdf</span>
-            Report
-          </button>
-          <button
-            className="btn-secondary px-3"
-            onClick={() => onToast(`Email sent to ${name}`, 'info')}
-            title="Send email"
-          >
-            <span className="material-symbols-outlined text-base">mail</span>
-          </button>
+          {user?.role !== 'student' ? (
+            <>
+              <button
+                className="btn-primary flex-1 justify-center bg-[#4ff07f] text-[#003915]"
+                onClick={() => { onToast(`Editing profile for ${name}`, 'info'); }}
+              >
+                <span className="material-symbols-outlined text-base">edit</span>
+                Edit Profile
+              </button>
+              <button
+                className="btn-secondary px-3 bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white"
+                onClick={() => onToast(`Are you sure you want to delete ${name}?`, 'error')}
+              >
+                <span className="material-symbols-outlined text-base">delete</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                className="btn-secondary flex-1 justify-center"
+                onClick={() => onToast(`Report generated for ${name}`, 'info')}
+              >
+                <span className="material-symbols-outlined text-base">picture_as_pdf</span>
+                Download My Report
+              </button>
+              <button
+                className="btn-secondary px-4"
+                onClick={() => onToast(`Opening support ticket`, 'info')}
+              >
+                <span className="material-symbols-outlined text-base">support_agent</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

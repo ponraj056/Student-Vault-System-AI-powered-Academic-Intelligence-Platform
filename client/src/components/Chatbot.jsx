@@ -19,7 +19,7 @@ function BotAvatar() {
 function UserAvatar() {
   return (
     <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0
-      bg-[#1e1e32] dark:bg-white/10 border border-[#4ff07f]/30">
+      bg-gray-100 dark:bg-white/10 border border-[#4ff07f]/30">
       <span className="material-symbols-outlined text-[16px] text-[#4ff07f]"
         style={{ fontVariationSettings: "'FILL' 1" }}>
         person
@@ -54,22 +54,22 @@ function BotMessage({ msg }) {
       <BotAvatar />
       <div className="max-w-sm">
         <div className="px-4 py-3 rounded-2xl rounded-bl-sm text-sm
-          bg-white dark:bg-[#28283d]
+          bg-white dark:bg-[#1a1a1a]
           border border-gray-200 dark:border-white/8
-          text-gray-800 dark:text-[#e2e0fc]"
+          text-gray-950 dark:text-[#f3f4f6]"
           style={{ whiteSpace: 'pre-line' }}>
           {msg.text}
         </div>
         {msg.students && msg.students.length > 0 && (
           <div className="mt-3 space-y-2">
-            <p className="text-[11px] font-bold text-gray-400 dark:text-[#8890b5] uppercase tracking-wider ml-1">
+            <p className="text-[11px] font-bold text-gray-600 dark:text-[#8890b5] uppercase tracking-wider ml-1">
               Matched Records ({msg.students.length})
             </p>
             <div className="grid grid-cols-1 gap-2">
               {msg.students.map(s => (
                 <div key={s.id}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl
-                    bg-white dark:bg-[#1e1e32]
+                    bg-white dark:bg-[#151515]
                     border border-gray-200 dark:border-white/8
                     hover:border-[#4ff07f]/40 transition-all">
                   <img
@@ -80,7 +80,7 @@ function BotMessage({ msg }) {
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{s.name}</p>
-                    <p className="text-[10px] font-mono text-gray-400 dark:text-[#8890b5]">{s.dept} · Y{s.year} · {s.cgpa.toFixed(1)} GPA</p>
+                    <p className="text-[10px] font-mono text-gray-600 dark:text-[#8890b5]">{s.dept} · Y{s.year} · {s.cgpa.toFixed(1)} GPA</p>
                   </div>
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${s.status === 'clear'
                     ? 'bg-green-100 text-green-700 dark:bg-[#4ff07f]/15 dark:text-[#4ff07f]'
@@ -103,7 +103,7 @@ function TypingIndicator() {
     <div className="flex items-end gap-2 animate-slide-left">
       <BotAvatar />
       <div className="px-4 py-3 rounded-2xl rounded-bl-sm flex items-center gap-2
-        bg-white dark:bg-[#28283d] border border-gray-200 dark:border-white/8">
+        bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/8">
         <div className="flex items-center gap-1">
           {[0, 1, 2].map(i => (
             <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#4ff07f] typing-dot" />
@@ -118,22 +118,21 @@ function TypingIndicator() {
 }
 
 const QUICK_ACTIONS = [
-  { text: '📊 Students with attendance below 75%', query: 'Show students with low attendance below 75%', color: 'rgba(79,240,127,0.08)', border: 'rgba(79,240,127,0.2)', textColor: '#4ff07f' },
-  { text: '⚠️ List all students with arrears', query: 'List arrear students', color: 'rgba(255,180,171,0.08)', border: 'rgba(255,180,171,0.2)', textColor: '#ffb4ab' },
-  { text: '🏆 Top performers by CGPA', query: 'Show top performers by CGPA', color: 'rgba(249,208,63,0.08)', border: 'rgba(249,208,63,0.2)', textColor: '#f9d03f' },
+  { text: '📊 Low attendance (<75%)', query: 'Show students with low attendance below 75%', color: 'rgba(79,240,127,0.08)', border: 'rgba(79,240,127,0.2)', textColor: '#4ff07f', role: 'faculty' },
+  { text: '⚠️ Arrear list', query: 'List arrear students', color: 'rgba(255,180,171,0.08)', border: 'rgba(255,180,171,0.2)', textColor: '#ffb4ab', role: 'faculty' },
+  { text: '🏆 Top performers', query: 'Show top performers by CGPA', color: 'rgba(249,208,63,0.08)', border: 'rgba(249,208,63,0.2)', textColor: '#f9d03f', role: 'faculty' },
+  
+  { text: '📈 My Attendance', query: 'Show my attendance', color: 'rgba(79,240,127,0.08)', border: 'rgba(79,240,127,0.2)', textColor: '#4ff07f', role: 'student' },
+  { text: '📜 My Results', query: 'Show my results', color: 'rgba(173,198,255,0.08)', border: 'rgba(173,198,255,0.2)', textColor: '#adc6ff', role: 'student' },
+  { text: '💼 My Internship', query: 'Show my internship details', color: 'rgba(249,208,63,0.08)', border: 'rgba(249,208,63,0.2)', textColor: '#f9d03f', role: 'student' },
 ];
 
-const INITIAL_MESSAGES = [
-  {
-    id: 1, role: 'ai', time: 'Today, 9:00 AM',
-    text: "👋 Hello! I'm your VSB AI Campus Assistant.\n\nAsk me about student records, attendance, CGPA, arrears, or generate reports instantly.",
-  },
-];
+const INITIAL_MESSAGES = [];
 
 
 
 /* ---- Main Chatbot component ---- */
-export default function Chatbot({ standalone = false }) {
+export default function Chatbot({ standalone = false, user }) {
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [input, setInput] = useState('');
   const [typing, setTyping] = useState(false);
@@ -158,7 +157,11 @@ export default function Chatbot({ standalone = false }) {
       const response = await fetch('/api/ai/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: msg })
+        body: JSON.stringify({ 
+          query: msg,
+          userRole: user?.role,
+          studentId: user?.studentId || user?.username
+        })
       });
       const data = await response.json();
       
@@ -166,6 +169,7 @@ export default function Chatbot({ standalone = false }) {
       if (data.data && Array.isArray(data.data)) {
         // Map backend formatting to expected frontend bot format
         matchedData = data.data.map((item, idx) => ({
+          ...item,
           id: item.rollNo || item._id || String(idx),
           name: item.name,
           dept: item._dept || item.dept || 'Unknown',
@@ -209,7 +213,7 @@ export default function Chatbot({ standalone = false }) {
           <h2 className={`font-black tracking-tight text-gray-900 dark:text-white ${standalone ? 'text-2xl' : 'text-xl'}`}>
             AI Campus Assistant
           </h2>
-          <p className="text-sm mt-0.5 text-gray-500 dark:text-[#8890b5]">
+          <p className="text-sm mt-0.5 text-gray-600 dark:text-[#8890b5]">
             Ask anything about students, attendance, results, or reports.
           </p>
         </div>
@@ -222,7 +226,7 @@ export default function Chatbot({ standalone = false }) {
 
       {/* Chat window */}
       <div className="rounded-2xl overflow-hidden
-        bg-white dark:bg-[#1e1e32]
+        bg-white dark:bg-[#121212]
         border border-gray-200 dark:border-white/5
         shadow-xl shadow-black/5 dark:shadow-black/40"
         style={{ maxWidth: standalone ? '100%' : 860, margin: '0 auto' }}>
@@ -238,7 +242,7 @@ export default function Chatbot({ standalone = false }) {
           </div>
           <div>
             <p className="text-sm font-bold text-gray-900 dark:text-white">VSB AI Assistant</p>
-            <p className="text-xs text-gray-400 dark:text-[#8890b5]">Powered by Institutional Intelligence</p>
+            <p className="text-xs text-gray-600 dark:text-[#8890b5]">Powered by Institutional Intelligence</p>
           </div>
           <div className="ml-auto flex items-center gap-2">
             <button
@@ -255,7 +259,7 @@ export default function Chatbot({ standalone = false }) {
 
         {/* Messages Area */}
         <div className={`flex flex-col gap-4 p-5 ${chatHeight} overflow-y-auto scrollbar-thin
-          bg-gray-50/50 dark:bg-[#111125]/40`}>
+          bg-gray-50/50 dark:bg-black/20`}>
 
           {/* Quick action chips inside chat */}
           <div className="flex items-end gap-2">
@@ -264,9 +268,9 @@ export default function Chatbot({ standalone = false }) {
               <div className="px-4 py-3 rounded-2xl rounded-bl-sm text-sm
                 bg-white dark:bg-[#28283d]
                 border border-gray-200 dark:border-white/8">
-                <p className="font-semibold mb-2.5 text-xs text-gray-400 dark:text-[#8890b5]">Quick actions — click to ask:</p>
+                <p className="font-semibold mb-2.5 text-xs text-gray-600 dark:text-[#8890b5]">Quick actions — click to ask:</p>
                 <div className="space-y-1.5">
-                  {QUICK_ACTIONS.map(item => (
+                  {QUICK_ACTIONS.filter(a => !a.role || a.role === user?.role).map(item => (
                     <button
                       key={item.text}
                       onClick={() => sendMessage(item.query)}
@@ -293,7 +297,7 @@ export default function Chatbot({ standalone = false }) {
         {/* Suggestion chips */}
         <div className="px-4 pt-3 pb-2 flex gap-2 overflow-x-auto no-scrollbar
           border-t border-gray-100 dark:border-white/5
-          bg-white dark:bg-[#1a1a2e]">
+          bg-white dark:bg-[#0d0d0d]">
           {SUGGESTIONS.map(s => (
             <button
               key={s.label}
@@ -307,7 +311,7 @@ export default function Chatbot({ standalone = false }) {
         </div>
 
         {/* Input row */}
-        <div className="px-4 py-3 bg-white dark:bg-[#1a1a2e]">
+        <div className="px-4 py-3 bg-white dark:bg-[#0d0d0d]">
           <div className="flex items-center gap-2">
             <button
               className={`mic-btn ${micActive ? 'listening' : ''}`}
@@ -332,7 +336,7 @@ export default function Chatbot({ standalone = false }) {
               <span className="material-symbols-outlined text-base">send</span>
             </button>
           </div>
-          <p className="text-[10px] mt-2 text-center text-gray-400 dark:text-[#8890b5]">
+          <p className="text-[10px] mt-2 text-center text-gray-600 dark:text-[#8890b5]">
             Press Enter to send · Results are shown as inline student cards
           </p>
         </div>

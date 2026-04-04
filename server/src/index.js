@@ -9,6 +9,7 @@ const studentRoutes = require('./routes/studentRoutes');
 const resultRoutes  = require('./routes/resultRoutes');
 const aiRoutes      = require('./routes/aiRoutes');
 const apiRoutes     = require('./routes/apiRoutes');
+const authRoutes    = require('./routes/authRoutes');
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -38,6 +39,7 @@ app.use('/students', studentRoutes);
 app.use('/results',  resultRoutes);
 app.use('/ai',       aiRoutes);
 app.use('/api',      apiRoutes);
+app.use('/api/auth', authRoutes);
 
 // ── WhatsApp Webhook (optional) ───────────
 try {

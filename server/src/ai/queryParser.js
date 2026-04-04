@@ -11,6 +11,7 @@ const INTENTS = {
   PASS_FAIL:    'PASS_FAIL',
   SEARCH:       'SEARCH',
   ATTENDANCE:   'ATTENDANCE',
+  MY_INFO:      'MY_INFO',
   UNKNOWN:      'UNKNOWN',
 };
 
@@ -19,6 +20,14 @@ const INTENTS = {
  */
 function extractSemester(text) {
   const m = text.match(/sem(?:ester)?\s*(\d)/i) || text.match(/(\d)(?:st|nd|rd|th)?\s+sem/i);
+  return m ? parseInt(m[1]) : null;
+}
+
+/**
+ * Extract year from text
+ */
+function extractYear(text) {
+  const m = text.match(/(\d)(?:st|nd|rd|th)?\s+year/i) || text.match(/year\s*(\d)/i);
   return m ? parseInt(m[1]) : null;
 }
 
@@ -62,6 +71,20 @@ function parseQuery(query) {
 
   const text = query.trim();
   const lower = text.toLowerCase();
+
+  // MY_INFO intent (Higher priority)
+  if (/\bmy\b\s+(attendance|result|cgpa|internship|status|profile|mark|details|record)/i.test(lower)) {
+    let subType = 'profile';
+    if (lower.includes('attendance')) subType = 'attendance';
+    if (lower.includes('result') || lower.includes('mark')) subType = 'results';
+    if (lower.includes('cgpa')) subType = 'cgpa';
+    if (lower.includes('internship')) subType = 'internship';
+    
+    return {
+      intent: INTENTS.MY_INFO,
+      params: { subType, semester: extractSemester(lower) }
+    };
+  }
 
   // TOPPER intent
   if (/topper|top student|highest mark|rank 1|first rank/i.test(lower)) {
@@ -127,11 +150,15 @@ function parseQuery(query) {
     };
   }
 
-  // STUDENT SEARCH
-  if (/find|search|show|who is|details|profile/i.test(lower)) {
+  // STUDENT SEARCH / LIST
+  if (/find|search|show|who is|details|profile|list|get|students/i.test(lower)) {
     return {
       intent: INTENTS.SEARCH,
-      params: { name: extractName(lower), dept: extractDept(lower) },
+      params: { 
+        name: extractName(lower), 
+        dept: extractDept(lower),
+        year: extractYear(lower)
+      },
     };
   }
 

@@ -9,7 +9,22 @@ const { getDeptModels } = require('./models/deptModels');
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 
 const sampleStudents = [
-  { rollNo: 'CS001', name: 'Arjun Sharma',   year: 3, section: 'A', email: 'arjun@vsb.edu',   phone: '9876543210', batch: '2022-26' },
+  {
+    rollNo: 'CS001', 
+    name: 'Arjun Sharma', 
+    year: 3, 
+    section: 'A', 
+    email: 'arjun@vsb.edu', 
+    batch: '2022-26', 
+    internships: [
+      { company: 'Microsoft Research', role: 'AI Engineering Intern', duration: '3 Months (Jan-Mar 2024)', summary: 'Developed neural retrieval systems for academic search engines.' },
+      { company: 'Google Cloud Engine', role: 'Cloud Computing Intern', duration: '2 Months (May-Jul 2024)', summary: 'Optimized server-side data synchronization for large datasets.' },
+      { company: 'Amazon Robotics', role: 'SDE Intern', duration: 'Upcoming (Dec 2024)', summary: 'Focusing on autonomous logistics algorithms and warehouse automation.' }
+    ],
+    cgpa: 9.2,
+    attendance: 95,
+    arrears: '0' 
+  },
   { rollNo: 'CS002', name: 'Priya Mehta',    year: 3, section: 'A', email: 'priya@vsb.edu',   phone: '9876543211', batch: '2022-26' },
   { rollNo: 'CS003', name: 'Rahul Nair',     year: 3, section: 'B', email: 'rahul@vsb.edu',   phone: '9876543212', batch: '2022-26' },
   { rollNo: 'CS004', name: 'Sneha Iyer',     year: 3, section: 'B', email: 'sneha@vsb.edu',   phone: '9876543213', batch: '2022-26' },

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
-export default function Attendance({ onToast }) {
-  const [dept, setDept] = useState('CSE');
+export default function Attendance({ onToast, user }) {
+  const [dept, setDept] = useState(user.role === 'student' ? user.department?.toUpperCase() || 'CSE' : 'CSE');
   const [dateFilter, setDateFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [records, setRecords] = useState([]);
@@ -14,7 +14,11 @@ export default function Attendance({ onToast }) {
         const res = await fetch(`/api/attendance/${dept}`);
         const data = await res.json();
         if (active) {
-          setRecords(data.data || []);
+          let list = data.data || [];
+          if (user.role === 'student' && user.studentId) {
+            list = list.filter(r => r.rollNo === user.studentId);
+          }
+          setRecords(list);
           setLoading(false);
         }
       } catch (e) {
@@ -26,7 +30,7 @@ export default function Attendance({ onToast }) {
     };
     fetchAttendance();
     return () => { active = false; };
-  }, [dept, onToast]);
+  }, [dept, onToast, user]);
 
   const filtered = records.filter(r => {
     if (dateFilter && !r.date.includes(dateFilter)) return false;
@@ -37,21 +41,25 @@ export default function Attendance({ onToast }) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Attendance Tracker</h2>
+          <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">
+            {user.role === 'student' ? 'My Attendance' : 'Attendance Tracker'}
+          </h2>
           <p className="text-sm mt-0.5 text-gray-500 dark:text-[#8890b5]">
-            Real-time presence analytics
+            {user.role === 'student' ? 'Personal presence analytics' : 'Real-time presence analytics'}
           </p>
         </div>
         <div className="flex gap-3">
-          <select 
-            className="filter-select"
-            value={dept}
-            onChange={(e) => setDept(e.target.value)}
-          >
-            {['CSE', 'ECE', 'IT', 'MECH', 'CIVIL'].map(d => (
-              <option key={d} value={d}>{d}</option>
-            ))}
-          </select>
+          {user.role !== 'student' && (
+            <select 
+              className="filter-select"
+              value={dept}
+              onChange={(e) => setDept(e.target.value)}
+            >
+              {['CSE', 'ECE', 'IT', 'MECH', 'CIVIL'].map(d => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+          )}
           <input 
             type="text"
             placeholder="Filter Date (e.g. 01-Apr)"
@@ -69,7 +77,7 @@ export default function Attendance({ onToast }) {
           </div>
         ) : filtered.length === 0 ? (
           <div className="p-12 text-center text-gray-500 dark:text-[#8890b5]">
-            No attendance records found for {dept}.
+            {user.role === 'student' ? 'No attendance records found for you.' : `No attendance records found for ${dept}.`}
           </div>
         ) : (
           <div className="overflow-x-auto">

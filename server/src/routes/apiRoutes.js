@@ -10,6 +10,10 @@ const studentService = require('../services/studentService');
 const resultService  = require('../services/resultService');
 const { parseQuery }  = require('../ai/queryParser');
 const { handleAiQuery } = require('../controllers/aiController');
+const multer = require('multer');
+const xlsx = require('xlsx');
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 // GET /api/health
 router.get('/health', (req, res) => {
@@ -116,5 +120,64 @@ router.get('/dashboard/all-students', async (req, res) => {
 
 // POST /api/ai/query
 router.post('/ai/query', handleAiQuery);
+
+// POST /api/upload
+router.post('/upload', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    const { type } = req.body;
+    
+    const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+    const User = require('../models/userModel');
+
+    // Simple mapping for hackathon: iterate through students and update
+    for (const row of data) {
+      const rollNo = row.RollNo || row.rollNo || row['Roll No'];
+      if (!rollNo) continue;
+
+      const { Student } = getDeptModels('cse'); // Default to CSE for demo
+      
+      // 1. Update/Create Student Profile
+      await Student.findOneAndUpdate(
+        { rollNo: { $regex: `^${rollNo}$`, $options: 'i' } },
+        { 
+          $set: { 
+            name: row.Name || row.name || 'New Student',
+            internships: [
+               { 
+                  company: row.Internship || row.internshipDetails || row['Internship Details'] || 'TBD', 
+                  role: row.Role || 'Intern', 
+                  duration: row.Duration || '3 Months' 
+               }
+            ],
+            cgpa: parseFloat(row.CGPA || row.cgpa || 8.5),
+            attendance: parseInt(row.Attendance || row.attendance || 90)
+          } 
+        },
+        { upsert: true }
+      );
+
+      // 2. Provision User Login if doesn't exist
+      const username = (row.Email || row.email || `${rollNo}@vsb.edu.in`).toLowerCase();
+      const userExists = await User.findOne({ username });
+      if (!userExists) {
+        await User.create({
+          username,
+          password: 'password123', // Default password for new uploads
+          role: type === 'faculty' ? 'faculty' : 'student',
+          name: row.Name || row.name || 'New User',
+          studentId: rollNo,
+          department: 'cse'
+        });
+      }
+    }
+
+    res.json({ success: true, message: `Successfully updated ${data.length} records.`, count: data.length });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
 module.exports = router;

@@ -21,12 +21,17 @@ const StudentSchema = new mongoose.Schema({
   hostel:      { type: String, enum: ['Hostel', 'Day Scholar', ''], default: '' },
   scholarship: String,
   arrearCount: { type: Number, default: 0 },
+  cgpa:        { type: Number, default: 8.5 },
+  attendance:  { type: Number, default: 90 },
+  internships: [
+     { company: String, role: String, duration: String, summary: String, verified: { type: Boolean, default: true } }
+  ],
   // Meta
   status:      { type: String, default: 'Active' },
   course:      String,
   uploadedBy:  String,
   uploadedAt:  Date,
-}, { timestamps: true });
+}, { timestamps: true, strict: false });
 
 const AttendanceSchema = new mongoose.Schema({
   rollNo:     String,
