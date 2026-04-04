@@ -1,8 +1,10 @@
 export const STUDENTS = [
+  { id: '922523205073', name: 'Kaviyarasan',    dept: 'IT',   year: 3, cgpa: 9.7, attendance: 98, status: 'clear',  avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=Ka&backgroundColor=4ff07f&textColor=003915' },
   { id: '721221104001', name: 'Abinesh K',      dept: 'CSE',  year: 2, cgpa: 9.2, attendance: 95, status: 'clear',  avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=AK&backgroundColor=4f46e5&textColor=ffffff' },
   { id: '721221104005', name: 'Bhavani S',      dept: 'CSE',  year: 2, cgpa: 8.7, attendance: 88, status: 'clear',  avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=BS&backgroundColor=7c3aed&textColor=ffffff' },
   { id: '721221104012', name: 'Dinesh Kumar M', dept: 'CSE',  year: 3, cgpa: 6.8, attendance: 72, status: 'arrear', avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=DK&backgroundColor=dc2626&textColor=ffffff' },
   { id: '721221104024', name: 'Harish R',       dept: 'CSE',  year: 4, cgpa: 9.5, attendance: 97, status: 'clear',  avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=HR&backgroundColor=059669&textColor=ffffff' },
+  { id: '721221104045', name: 'Kaviyarasu',     dept: 'CSE',  year: 3, cgpa: 9.8, attendance: 99, status: 'clear',  avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=K&backgroundColor=4ff07f&textColor=003915' },
   { id: '721221205001', name: 'Priya Nair',     dept: 'ECE',  year: 1, cgpa: 8.3, attendance: 82, status: 'clear',  avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=PN&backgroundColor=0891b2&textColor=ffffff' },
   { id: '721221205008', name: 'Karthik V',      dept: 'ECE',  year: 2, cgpa: 7.4, attendance: 68, status: 'arrear', avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=KV&backgroundColor=b45309&textColor=ffffff' },
   { id: '721221306002', name: 'Meena T',        dept: 'IT',   year: 3, cgpa: 9.0, attendance: 91, status: 'clear',  avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=MT&backgroundColor=be185d&textColor=ffffff' },
@@ -21,6 +23,18 @@ export const AI_RESPONSES = {
 
 export function getAIResponse(msg) {
   const lower = msg.toLowerCase();
+
+  // Custom check for specific student query
+  const matchedStudent = STUDENTS.find(s => lower.includes(s.name.toLowerCase().split(' ')[0]) || lower.includes(s.id.toLowerCase()));
+  if (matchedStudent) {
+    return `Here are the academic records I retrieved for ${matchedStudent.name} (${matchedStudent.id}):\n\nDepartment: ${matchedStudent.dept}\nYear: ${matchedStudent.year}\nCGPA: ${matchedStudent.cgpa}\nAttendance: ${matchedStudent.attendance}%\nStatus: ${matchedStudent.status === 'clear' ? 'Clear ✓' : 'Arrear ⚠'}`;
+  }
+
+  // If a student search was attempted but no one was found
+  if (lower.includes('details for') || lower.includes('find student') || lower.includes('show the details')) {
+    return "I couldn't find any student matching that name or ID in the current database. Please check the spelling or registration number and try again.";
+  }
+
   if (lower.includes('top') || lower.includes('performer') || lower.includes('best') || lower.includes('highest')) return AI_RESPONSES.top;
   if (lower.includes('low attendance') || lower.includes('below 75') || lower.includes('attendance below')) return AI_RESPONSES.attendance;
   if (lower.includes('arrear')) return AI_RESPONSES.arrear;
