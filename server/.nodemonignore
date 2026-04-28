@@ -1,0 +1,6 @@
+# Ignore uploads and outputs directories to prevent restart loops
+../uploads/**
+../outputs/**
+uploads/**
+outputs/**
+*.log

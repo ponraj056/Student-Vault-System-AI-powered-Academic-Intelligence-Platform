@@ -1,0 +1,31 @@
+{
+  "name": "studentvault-server",
+  "version": "2.0.0",
+  "description": "StudentVault — AI-Powered Academic Intelligence Platform for V.S.B. Engineering College",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon --ignore '../uploads' --ignore '../outputs' index.js",
+    "seed:admin": "node scripts/seedAdmin.js",
+    "seed:staff": "node scripts/seedStaff.js",
+    "seed:all": "node scripts/seedAdmin.js && node scripts/seedStaff.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^1.41.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "groq-sdk": "^0.7.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.4.1",
+    "multer": "^2.1.1",
+    "multer-storage-cloudinary": "^4.0.0",
+    "nodemailer": "^8.0.5",
+    "twilio": "^5.2.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}

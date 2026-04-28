@@ -1,0 +1,27 @@
+# ─── StudentVault Root .gitignore ─────────────────────────────────────────────
+
+# Dependencies
+node_modules/
+
+# Environment secrets
+.env
+*.env.local
+
+# Build output
+dist/
+build/
+
+# Uploads & generated files
+uploads/
+outputs/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
+
+# Misc
+*.pem
+*.key
