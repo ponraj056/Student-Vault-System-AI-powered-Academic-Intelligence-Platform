@@ -469,10 +469,22 @@ function AdminExcelUpload({ headers, departments, onSuccess }) {
   return (
     <div className="admin-card">
       <div className="admin-search-row" style={{ marginBottom: '1rem' }}>
-        <select className="admin-dept-select" value={dept} onChange={e => setDept(e.target.value)}>
-          <option value="">Select Department *</option>
-          {departments.map(d => <option key={d.dept} value={d.dept}>{d.dept}</option>)}
-        </select>
+        <input 
+          list="dept-options"
+          className="admin-search-input" 
+          placeholder="Enter or select department (e.g. CSE) *" 
+          value={dept} 
+          onChange={e => setDept(e.target.value.toUpperCase())}
+          style={{ maxWidth: '300px' }}
+        />
+        <datalist id="dept-options">
+          <option value="CSE" />
+          <option value="IT" />
+          <option value="ECE" />
+          <option value="EEE" />
+          <option value="MECH" />
+          {departments.map(d => <option key={d.dept} value={d.dept} />)}
+        </datalist>
       </div>
       <div className="upload-zone" onClick={() => document.getElementById('admin-excel').click()}>
         <div className="upload-zone-icon">📁</div>
