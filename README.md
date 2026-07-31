@@ -2,7 +2,6 @@
 
 > **AI-Powered Academic Intelligence Platform** — Natural language queries, role-based dashboards, and automated Excel imports for engineering college student data management.
 
-Built by **Ponraj D** | V.S.B. Engineering College, Karur (Batch 2023–2027)
 
 ---
 
