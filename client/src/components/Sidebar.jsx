@@ -33,11 +33,11 @@ export default function Sidebar({ activeNav, onNavChange, user, onLogout }) {
           </div>
           <div>
             <h1 className="text-lg font-black tracking-tighter text-gray-900 dark:text-white leading-none">
-              Vault<span className="text-[#4ff07f]">.AI</span>
+              Student<span className="text-[#4ff07f]"> Portal</span>
             </h1>
             <div className="flex items-center gap-1.5 mt-1">
-               <span className="text-[8px] uppercase font-black tracking-[0.2em] text-gray-500">Academic Hub</span>
-               <span className="px-1.5 py-0.5 rounded-full bg-[#4ff07f]/10 text-[#4ff07f] text-[7px] font-black uppercase tracking-widest border border-[#4ff07f]/20">Pro</span>
+               <span className="text-[8px] uppercase font-black tracking-[0.2em] text-gray-500">VSB Engineering</span>
+               <span className="px-1.5 py-0.5 rounded-full bg-[#4ff07f]/10 text-[#4ff07f] text-[7px] font-black uppercase tracking-widest border border-[#4ff07f]/20">2622</span>
             </div>
           </div>
         </div>
