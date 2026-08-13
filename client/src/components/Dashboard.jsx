@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiFetch } from '../utils/api';
 import StudentCard from './StudentCard';
 import Analytics from './Analytics';
 import Chatbot from './Chatbot';
@@ -60,8 +61,8 @@ export default function Dashboard({ activeNav, onToast, onOpenModal, user }) {
     const loadData = async () => {
       try {
         const [statsRes, studentsRes] = await Promise.all([
-          fetch('/api/stats'),
-          fetch('/api/dashboard/all-students')
+          apiFetch('/api/stats'),
+          apiFetch('/api/dashboard/all-students')
         ]);
         const stats = await statsRes.json();
         const students = await studentsRes.json();

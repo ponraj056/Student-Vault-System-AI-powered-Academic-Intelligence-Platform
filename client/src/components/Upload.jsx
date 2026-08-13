@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { apiFetch } from '../utils/api';
 
 export default function Upload({ onToast }) {
   const [dragActive, setDragActive] = useState(false);
@@ -44,7 +45,7 @@ export default function Upload({ onToast }) {
       formData.append('file', file);
       formData.append('type', type);
 
-      const response = await fetch('/api/upload', {
+      const response = await apiFetch('/api/upload', {
         method: 'POST',
         body: formData
       });

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiFetch } from '../utils/api';
 
 export default function Reports({ onToast }) {
   const [dept, setDept] = useState('CSE');
@@ -10,7 +11,7 @@ export default function Reports({ onToast }) {
     const fetchStats = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/results/stats?dept=${dept}`);
+        const res = await apiFetch(`/api/results/stats?dept=${dept}`);
         const json = await res.json();
         if (active) {
           setStats(json.data || null);

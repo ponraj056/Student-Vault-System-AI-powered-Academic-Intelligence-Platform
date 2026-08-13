@@ -11,11 +11,18 @@ const CACHEABLE = new Set([
 
 const handleAiQuery = async (req, res) => {
   try {
-    const { query, userRole, studentId, userDept } = req.body;
+    const { query } = req.body;
+    const userRole = req.user?.role;
+    const studentId = req.user?.studentId;
+    const userDept = req.user?.department;
     if (!query) return res.status(400).json({ error: "Provide { query: '...' } in request body" });
 
     const parsed  = parseQuery(query);
     const { intent, params } = parsed;
+
+    if (userRole === 'student' && intent !== INTENTS.MY_INFO) {
+      return res.status(403).json({ error: 'Students can use the assistant only for their personal information.' });
+    }
 
     // For HOD/Faculty: restrict dept to their own department
     if ((userRole === 'hod' || userRole === 'faculty') && userDept) {

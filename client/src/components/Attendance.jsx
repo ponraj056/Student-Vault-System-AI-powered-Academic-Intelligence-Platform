@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiFetch } from '../utils/api';
 
 export default function Attendance({ onToast, user }) {
   const [dept, setDept] = useState(user.role === 'student' ? user.department?.toUpperCase() || 'CSE' : 'CSE');
@@ -11,7 +12,7 @@ export default function Attendance({ onToast, user }) {
     const fetchAttendance = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/attendance/${dept}`);
+        const res = await apiFetch(`/api/attendance/${dept}`);
         const data = await res.json();
         if (active) {
           let list = data.data || [];

@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "seed": "node src/seed.js"
+    "seed": "node src/seed.js",
+    "import:it": "node src/scripts/importItRoster.js"
   },
   "dependencies": {
     "archiver": "^6.0.1",

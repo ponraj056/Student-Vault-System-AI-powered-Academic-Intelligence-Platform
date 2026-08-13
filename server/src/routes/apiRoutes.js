@@ -12,6 +12,7 @@ const { parseQuery }  = require('../ai/queryParser');
 const { handleAiQuery } = require('../controllers/aiController');
 const multer = require('multer');
 const xlsx = require('xlsx');
+const { requireAuth, isStudent, isAdmin } = require('../middleware/auth');
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -20,9 +21,16 @@ router.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date(), db: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected' });
 });
 
+router.use(requireAuth);
+
 // GET /api/stats — dashboard summary cards
 router.get('/stats', async (req, res) => {
   try {
+    if (isStudent(req)) {
+      const student = await studentService.getStudentByRollNo(req.user.studentId, req.user.department);
+      if (!student) return res.status(404).json({ error: 'Student profile not found.' });
+      return res.json({ totalStudents: 1, totalArrears: student.arrearCount || 0, passRate: student.cgpa || 0, departments: 1 });
+    }
     const { total, breakdown } = await studentService.getTotalStudentCount();
     const arrears  = await resultService.getStudentsWithArrears();
     const passFail = await resultService.getPassFailStats();
@@ -40,6 +48,10 @@ router.get('/stats', async (req, res) => {
 // GET /api/students?name=&rollNo=&dept=&page=1&limit=20
 router.get('/students', async (req, res) => {
   try {
+    if (isStudent(req)) {
+      const student = await studentService.getStudentByRollNo(req.user.studentId, req.user.department);
+      return res.json({ count: student ? 1 : 0, data: student ? [student] : [] });
+    }
     const { name, rollNo, dept } = req.query;
     const data = await studentService.searchStudents({ name: name || '', rollNo, dept });
     res.json({ count: data.length, data });
@@ -50,6 +62,9 @@ router.get('/students', async (req, res) => {
 router.get('/students/:dept/:rollNo', async (req, res) => {
   try {
     const { dept, rollNo } = req.params;
+    if (isStudent(req) && (rollNo !== req.user.studentId || dept.toLowerCase() !== req.user.department)) {
+      return res.status(403).json({ error: 'Students can access only their own profile.' });
+    }
     const student = await studentService.getStudentByRollNo(rollNo, dept);
     if (!student) return res.status(404).json({ error: 'Not found' });
     const results = await resultService.getResultsByRollNo(rollNo, dept);
@@ -60,6 +75,7 @@ router.get('/students/:dept/:rollNo', async (req, res) => {
 // GET /api/results/topper?semester=5&dept=cse
 router.get('/results/topper', async (req, res) => {
   try {
+    if (isStudent(req)) return res.status(403).json({ error: 'Ranking data is not available in the student portal.' });
     const { semester, dept } = req.query;
     const data = await resultService.getTopperBySemester(semester || 5, dept);
     res.json({ count: data.length, data });
@@ -69,6 +85,7 @@ router.get('/results/topper', async (req, res) => {
 // GET /api/results/arrears?dept=cse
 router.get('/results/arrears', async (req, res) => {
   try {
+    if (isStudent(req)) return res.status(403).json({ error: 'Arrear lists are not available in the student portal.' });
     const data = await resultService.getStudentsWithArrears(req.query.dept);
     res.json({ count: data.length, data });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -77,6 +94,10 @@ router.get('/results/arrears', async (req, res) => {
 // GET /api/results/ranking?dept=cse
 router.get('/results/ranking', async (req, res) => {
   try {
+    if (isStudent(req)) {
+      const data = await resultService.getResultsByRollNo(req.user.studentId, req.user.department);
+      return res.json({ count: data.length, data });
+    }
     const data = await resultService.getCgpaRanking(req.query.dept);
     res.json({ count: data.length, data });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -85,6 +106,7 @@ router.get('/results/ranking', async (req, res) => {
 // GET /api/results/stats?semester=5&dept=cse
 router.get('/results/stats', async (req, res) => {
   try {
+    if (isStudent(req)) return res.status(403).json({ error: 'Department statistics are not available in the student portal.' });
     const { semester, dept } = req.query;
     const data = await resultService.getPassFailStats(semester, dept);
     res.json({ data });
@@ -95,9 +117,10 @@ router.get('/results/stats', async (req, res) => {
 router.get('/attendance/:dept', async (req, res) => {
   try {
     const { dept } = req.params;
+    if (isStudent(req) && dept.toLowerCase() !== req.user.department) return res.status(403).json({ error: 'Students can access only their own attendance.' });
     const { name } = req.query;
     const { Attendance } = getDeptModels(dept.toLowerCase());
-    const query = name ? { name: { $regex: name, $options: 'i' } } : {};
+    const query = isStudent(req) ? { rollNo: req.user.studentId } : (name ? { name: { $regex: name, $options: 'i' } } : {});
     const data = await Attendance.find(query).sort({ date: -1 }).limit(200).lean();
     res.json({ count: data.length, data });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -112,7 +135,8 @@ router.get('/departments', (req, res) => {
 router.get('/dashboard/all-students', async (req, res) => {
   try {
     const data = await studentService.getDashboardStudents();
-    res.json({ count: data.length, data });
+    const scopedData = isStudent(req) ? data.filter(student => student.id === req.user.studentId && student.dept.toLowerCase() === req.user.department) : data;
+    res.json({ count: scopedData.length, data: scopedData });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -124,6 +148,7 @@ router.post('/ai/query', handleAiQuery);
 // POST /api/upload
 router.post('/upload', upload.single('file'), async (req, res) => {
   try {
+    if (!isAdmin(req)) return res.status(403).json({ error: 'Only an admin or HOD can import data.' });
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
     const { type } = req.body;
     

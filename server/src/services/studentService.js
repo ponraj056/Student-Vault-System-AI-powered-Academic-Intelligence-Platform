@@ -62,8 +62,7 @@ async function getDashboardStudents() {
   for (const d of DEPARTMENTS) {
     try {
       const { Student } = getDeptModels(d);
-      // Limit to 10 per dept → max 160 students across 16 depts
-      const students = await Student.find().select('rollNo name year cgpa attendance arrearCount internshipDetails').limit(10).lean();
+      const students = await Student.find().select('rollNo name year cgpa attendance arrearCount internshipDetails').lean();
       if (!students || students.length === 0) continue;
 
       for (const s of students) {

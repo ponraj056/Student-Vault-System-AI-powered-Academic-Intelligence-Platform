@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiFetch } from '../utils/api';
 
 export default function Internship({ user, onToast }) {
   const [loading, setLoading] = useState(true);
@@ -9,7 +10,7 @@ export default function Internship({ user, onToast }) {
   useEffect(() => {
     const fetchInternship = async () => {
       try {
-        const response = await fetch('/api/ai/query', {
+        const response = await apiFetch('/api/ai/query', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 

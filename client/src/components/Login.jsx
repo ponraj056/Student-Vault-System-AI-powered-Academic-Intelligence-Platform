@@ -12,6 +12,7 @@ const Login = ({ onLogin }) => {
     student: { id: 'firstname.lastname@vsb.edu.in', pin: 'Register No. (e.g. 23205019)', placeholder: 'yourname@vsb.edu.in', pinPlaceholder: 'e.g. 23205019' },
     faculty: { id: 'name.dept@vsb.edu.in',          pin: 'Faculty ID (e.g. FAC001)',     placeholder: 'kumar.cse@vsb.edu.in',  pinPlaceholder: 'FAC001' },
     hod:     { id: 'hod.dept@vsb.edu.in',            pin: 'HOD ID (e.g. HOD001)',         placeholder: 'hod.cse@vsb.edu.in',    pinPlaceholder: 'HOD001' },
+    admin:   { id: 'admin@vsb.edu.in',                pin: 'Administrator password',       placeholder: 'admin@vsb.edu.in',      pinPlaceholder: 'Administrator password' },
   };
 
   const handleRoleSwitch = (newRole) => {
@@ -122,7 +123,7 @@ const Login = ({ onLogin }) => {
                 <form onSubmit={handleSubmit} className="space-y-5">
                    {/* Role Switcher */}
                    <div className="flex p-1 bg-white/5 rounded-2xl border border-white/5">
-                      {['student', 'faculty', 'hod'].map(r => (
+                      {['student', 'faculty', 'hod', 'admin'].map(r => (
                          <button
                            key={r}
                            type="button"
@@ -207,9 +208,10 @@ const Login = ({ onLogin }) => {
                          <p className="text-[9px] text-blue-400 font-mono truncate">{hint.id}</p>
                       </div>
                       <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-center">
-                         <p className="text-[8px] text-gray-600 mb-1">PIN</p>
+                         <p className="text-[8px] text-gray-600 mb-1">Password</p>
                          <p className="text-[9px] text-cyan-400 font-mono">{hint.pin}</p>
-                      </div>
+                  </div>
+                  <p className="text-[9px] text-gray-600 text-center">Students can sign in using their register number or email address.</p>
                    </div>
                 </div>
              </div>

@@ -57,6 +57,13 @@ User Input → Query Processing → Backend API → Database → AI Logic → Re
 ### Database
 - MongoDB Atlas
 
+### Importing your IT roster
+
+1. Create `server/.env` with `MONGODB_URI`, `JWT_SECRET`, and `DEFAULT_STUDENT_PASSWORD`.
+2. Run `node src/seedUsers.js` once to create the administrator account (`admin` / `password123`), then change that password before deployment.
+3. Run `npm run import:it -- "C:\\path\\to\\IT_students_2023-email.xlsx"` from `server`.
+4. This permanently replaces only the IT department's students, results, attendance, and student accounts. Each student signs in with their register number or email and the configured default password.
+
 ### AI Layer
 - Rule-based Query Parser (extendable to LLM)
 

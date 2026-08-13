@@ -9,7 +9,7 @@ export default function Sidebar({ activeNav, onNavChange, user, onLogout }) {
     if (role === 'faculty' || role === 'staff') {
       return ['students', 'chatbot', 'attendance', 'results', 'internship', 'upload'].includes(item.key);
     }
-    if (role === 'hod') {
+    if (role === 'hod' || role === 'admin') {
       return ['students', 'chatbot', 'attendance', 'results', 'internship', 'reports'].includes(item.key);
     }
     return true;

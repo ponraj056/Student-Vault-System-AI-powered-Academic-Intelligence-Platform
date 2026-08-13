@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiFetch } from '../utils/api';
 
 export default function Results({ onToast, user }) {
   const [dept, setDept] = useState(user.role === 'student' ? user.department?.toUpperCase() || 'CSE' : 'CSE');
@@ -19,7 +20,7 @@ export default function Results({ onToast, user }) {
           ? `/api/results/ranking?dept=${dept}` // Reuse ranking for personal search or add specific route
           : `/api/results/topper?dept=${dept}&semester=5`;
           
-        const res = await fetch(url);
+        const res = await apiFetch(url);
         const json = await res.json();
         if (active) {
           let list = json.data || [];
