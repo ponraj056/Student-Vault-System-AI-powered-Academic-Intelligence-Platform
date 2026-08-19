@@ -13,6 +13,7 @@ import StudentModal from './components/StudentModal';
 import ToastContainer from './components/ToastContainer';
 import { useToast } from './hooks/useToast';
 import Login from './components/Login';
+import StudentDashboard from './components/StudentDashboard';
 
 export default function App() {
   const [user, setUser] = useState(() => {
@@ -52,15 +53,26 @@ export default function App() {
       case 'reports':    return <Reports onToast={showToast} user={user} />;
       case 'upload':     return <Upload onToast={showToast} user={user} />;
       case 'settings':   return <Settings theme={theme} setTheme={setTheme} onToast={showToast} user={user} />;
-      default:           return (
-        <Dashboard
-          activeNav={activeNav}
-          onToast={showToast}
-          onOpenModal={setSelectedStudent}
-          theme={theme}
-          user={user}
-        />
-      );
+      default:
+        // Students always see their personal dashboard, not the admin/faculty view
+        if (user.role === 'student') {
+          return (
+            <StudentDashboard
+              user={user}
+              onToast={showToast}
+              onNavChange={setActiveNav}
+            />
+          );
+        }
+        return (
+          <Dashboard
+            activeNav={activeNav}
+            onToast={showToast}
+            onOpenModal={setSelectedStudent}
+            theme={theme}
+            user={user}
+          />
+        );
     }
   };
 

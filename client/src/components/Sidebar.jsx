@@ -1,19 +1,28 @@
 import { NAV_ITEMS } from '../data';
 
 export default function Sidebar({ activeNav, onNavChange, user, onLogout }) {
-  const filteredNavItems = NAV_ITEMS.filter(item => {
-    const role = user.role?.toLowerCase();
-    if (role === 'student') {
-      return ['chatbot', 'attendance', 'results', 'internship'].includes(item.key);
-    }
-    if (role === 'faculty' || role === 'staff') {
-      return ['students', 'chatbot', 'attendance', 'results', 'internship', 'upload'].includes(item.key);
-    }
-    if (role === 'hod' || role === 'admin') {
-      return ['students', 'chatbot', 'attendance', 'results', 'internship', 'reports'].includes(item.key);
-    }
-    return true;
-  });
+  const isStudent = user.role?.toLowerCase() === 'student';
+
+  // For students: prepend a 'My Dashboard' item, then show their scoped nav items
+  const studentDashboardItem = { key: 'students', label: 'My Dashboard', icon: 'dashboard' };
+
+  const filteredNavItems = isStudent
+    ? [
+        studentDashboardItem,
+        ...NAV_ITEMS.filter(item =>
+          ['chatbot', 'attendance', 'results', 'internship'].includes(item.key)
+        ),
+      ]
+    : NAV_ITEMS.filter(item => {
+        const role = user.role?.toLowerCase();
+        if (role === 'faculty' || role === 'staff') {
+          return ['students', 'chatbot', 'attendance', 'results', 'internship', 'upload'].includes(item.key);
+        }
+        if (role === 'hod' || role === 'admin') {
+          return ['students', 'chatbot', 'attendance', 'results', 'internship', 'reports'].includes(item.key);
+        }
+        return true;
+      });
 
   return (
     <aside className="h-screen w-60 fixed left-0 top-0 flex flex-col z-50
@@ -90,7 +99,7 @@ export default function Sidebar({ activeNav, onNavChange, user, onLogout }) {
       {/* User footer - Luxury refinement */}
       <div className="p-4">
          <div className="rounded-[2rem] bg-white/[0.03] border border-white/5 p-4 space-y-4">
-            <div className="flex items-center gap-3">
+             <div className="flex items-center gap-3">
                <div className="relative">
                   <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center border border-white/10 shadow-lg">
                      <img src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${user.name}`} className="w-8 h-8 rounded-lg" alt="" />
@@ -105,6 +114,12 @@ export default function Sidebar({ activeNav, onNavChange, user, onLogout }) {
                      <span className="w-1 h-1 rounded-full bg-[#4ff07f]" />
                      {user.role}
                   </p>
+                  {/* Show register number for students */}
+                  {isStudent && user.studentId && (
+                    <p className="text-[8px] font-mono text-[#4ff07f]/70 mt-0.5 truncate">
+                      {user.studentId}
+                    </p>
+                  )}
                </div>
             </div>
             
